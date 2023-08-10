@@ -2,17 +2,27 @@
 
 * Build the library:
 ```
-clang++ -shared -fsanitize=cfi-icall -fsanitize-cfi-cross-dso -flto=thin -fno-sanitize-trap=cfi-icall -o libcfitest.so lib.cc
+clang++ -fsanitize=cfi-icall -flto=thin -fno-sanitize-trap=cfi-icall -c lib.cc
 ```
 
 * Build the C binary:
 ```
-clang -fsanitize=cfi-icall -fsanitize-cfi-cross-dso -flto=thin -fno-sanitize-trap=cfi-icall -L. -lcfitest -o cfi_test_c cfi.c
+clang -fsanitize=cfi-icall -flto=thin -fno-sanitize-trap=cfi-icall -c cfi.c -o cfi_c.o
 ```
 
 * Build the C++ binary:
 ```
-clang++ -fsanitize=cfi-icall -fsanitize-cfi-cross-dso -flto=thin -fno-sanitize-trap=cfi-icall -L. -lcfitest -o cfi_test_cc cfi.cc && echo "Running"  && LD_LIBRARY_PATH=`pwd` ./cfi_test_cc
+clang++ -fsanitize=cfi-icall -flto=thin -fno-sanitize-trap=cfi-icall -c cfi.cc -o cfi_cc.o
+```
+
+* Link the C binary:
+```
+clang++ -fsanitize=cfi-icall -flto=thin -fno-sanitize-trap=cfi-icall cfi_c.o lib.o -o cfi_test_c
+```
+
+* Link the C++ binary:
+```
+clang++ -fsanitize=cfi-icall -flto=thin -fno-sanitize-trap=cfi-icall cfi_cc.o lib.o -o cfi_test_cc
 ```
 
 ## Description
@@ -23,6 +33,8 @@ defined in a C++ library.
 
 The almost-similar code when executed as C++ seems to be running fine.
 
+The error also goes away when `-fsanitize-cfi-icall-generalize-pointers` is used.
+
 Clang version:
 ```
 Debian clang version 15.0.7
@@ -32,13 +44,13 @@ InstalledDir: /usr/bin
 ```
 
 ```
-$ LD_LIBRARY_PATH=`pwd` ./cfi_test_c
-cfi.c:10:3: runtime error: control flow integrity check for type 'int (int, const struct CfiTest *)' failed during indirect function call
+$ ./cfi_test_c
+cfi.c:12:3: runtime error: control flow integrity check for type 'int (int, const struct CfiTest *)' failed during indirect function call
 (/usr/local/google/home/vigneshv/code/clang_cfi_bug/libcfitest.so+0x3050): note: testFunction defined here
 SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior cfi.c:10:3 in
 ```
 
 ```
-$ LD_LIBRARY_PATH=`pwd` ./cfi_test_cc
+$ ./cfi_test_cc
 ... runs without errors ...
 ```

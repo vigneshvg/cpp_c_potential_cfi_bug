@@ -17,7 +17,7 @@ int main(void) {
   int (*func2)(int, int) = testFunctionWithoutStructParam;
   func2(10, 20);
 
-  fprintf(stderr, "done :)");
+  fprintf(stderr, "done :)\n");
 
   return 0;
 }
