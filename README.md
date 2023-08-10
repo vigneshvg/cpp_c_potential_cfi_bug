@@ -1,16 +1,16 @@
 ## Build Instructions
 
-* Build the library:
+* Compile the library:
 ```
 clang++ -fsanitize=cfi-icall -flto=thin -fno-sanitize-trap=cfi-icall -c lib.cc
 ```
 
-* Build the C binary:
+* Compile the C binary:
 ```
 clang -fsanitize=cfi-icall -flto=thin -fno-sanitize-trap=cfi-icall -c cfi.c -o cfi_c.o
 ```
 
-* Build the C++ binary:
+* Compile the C++ binary:
 ```
 clang++ -fsanitize=cfi-icall -flto=thin -fno-sanitize-trap=cfi-icall -c cfi.cc -o cfi_cc.o
 ```
